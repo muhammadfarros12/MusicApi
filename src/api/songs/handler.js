@@ -18,15 +18,15 @@ class SongsHandler {
         try {
             // validasi data
             this._validator.validateSongPayload(request.payload);
-            const { title = "untitled", year, performer, genre, duration } = request.payload;
+            const { title = 'untitled', year, performer, genre, duration } = request.payload;
 
             const songId = await this._service.addSong({
                 title, year, performer, genre, duration
             });
 
         const response = h.response({
-            status: "success",
-            message: "Lagu berhasil ditambahkan",
+            status: 'success',
+            message: 'Lagu berhasil ditambahkan',
             data: {
                 songId,
             },
@@ -37,7 +37,7 @@ class SongsHandler {
             // setelah custom error kita menambahkan proses evaluasi object error
             if (error instanceof ClientError) {
             const response = h.response({
-            status: "fail",
+            status: 'fail',
             message: error.message,
             });
             response.code(error.statusCode);
