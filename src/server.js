@@ -1,7 +1,6 @@
 // import dotenv untuk import dan menjalankan konfigurasinya
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-// const routes = require('./routes');
 const songs = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
 // untuk validator
