@@ -1,6 +1,7 @@
 // import dotenv untuk import dan menjalankan konfigurasinya
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
 // songs
 const songs = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
@@ -9,10 +10,17 @@ const SongsValidator = require('./validator/songs');
 const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
+//authentications
+const authentications = require('./api/authetications');
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const TokenManager = require('./tokenize/TokenManager');
+const AuthenticationsValidator = require('./validator/authentications');
 
 const init = async () => {
   const songsService = new SongsService();
   const usersService = new UsersService();
+  const authenticationsService = new AuthenticationsService();
+
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -22,8 +30,32 @@ const init = async () => {
       },
     },
   });
-  // tidak digunakan
-  //server.route(routes);
+
+  // registrasi plugin external
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  // mendefinisikan strategy autentikasi jwt
+  server.auth.strategy('musicapp_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id
+      }
+    })
+
+  })
 
   await server.register([
     {
@@ -37,8 +69,15 @@ const init = async () => {
     {
       plugin: users,
       options: {
-        service: UsersService,
+        service: usersService,
         validator: UsersValidator
+      }
+    },
+    {
+      plugin: authentications,
+      options: {
+        service: authenticationsService,
+        validator: AuthenticationsValidator
       }
     }
   ]);
