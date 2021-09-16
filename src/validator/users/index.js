@@ -2,7 +2,7 @@ const InvariantError = require("../../exceptions/InvariantError");
 const { UserPayloadSchema } = require("./schema")
 
 const UsersValidator = {
-    ValidityStateUserPayload: (payload) => {
+    validateUserPayload: (payload) => {
         const validationResult = UserPayloadSchema.validate(payload);
 
         if (validationResult.error) {
